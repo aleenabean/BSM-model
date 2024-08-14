@@ -1,0 +1,45 @@
+import numpy as np
+import streamlit as st
+from scipy.stats import norm
+
+# black-scholes formula (call + put options) af
+def black_scholes(S, K, T, r, sigma):
+  """
+  Calculate Black Scholes option prices
+
+  Parameters:
+  S : float : current stock price
+  K : float : strike price
+  T : float : time to maturity (years)
+  r : float : risk free interest rate (decimal)
+  sigma : float : volatility of stock (decimal)
+
+  Returns:
+  call_price : float : Call option price
+  put_price : float : Put option price
+  """
+  # calculate d1 and d2
+  d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+  d2 = d1 - sigma * np.sqrt(T)
+
+  # calculate call and put price
+  call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+  put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+
+  return call_price, put_price
+
+#streamlit app
+st.title("Black-Scholes Option Pricer")
+
+#user inputs
+S = st.number_input("Current Stock Price", value=100)
+K = st.number_input("Strike Price", value=100)
+T = st.number_input("Time to Maturity (years)", value=1.0)
+r = st.number_input("Risk-free Interest Rate (decimal)", value=0.05)
+sigma = st.number_input("Volatility (decimal)", value=0.2)
+
+#calc results
+if st.button("Calculate"):
+  call, put = black_scholes(S, K, T, r, sigma)
+  st.write(f"Call Price: ${call:.2f}")
+  st.write(f"Put Price: ${put:.2f}")
